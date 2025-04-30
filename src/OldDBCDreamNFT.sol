@@ -8,8 +8,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
-/// @custom:oz-upgrades-from OldDBCDreamNFT
-contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     uint256 public constant TOKEN_ID = 1;
     string private _name;
     string private _symbol;
@@ -53,7 +52,7 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
     }
 
     modifier onlyMinter() {
-        require(minters[msg.sender] || msg.sender == owner(), "Not authorized to mint");
+        require(minters[msg.sender], "Not authorized to mint");
         _;
     }
 

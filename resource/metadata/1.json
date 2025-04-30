@@ -1,5 +1,5 @@
 {
   "name": "DBCDreamNFT",
-  "image": "https://raw.githubusercontent.com/DeepBrainChain/DBCDreamNFT/main/resource/metadata/{id}.json",
+  "image": "https://raw.githubusercontent.com/DeepBrainChain/DBCDreamNFT/refs/heads/main/resource/image/{id}.png",
   "description": "DBCDreamNFT"
 }

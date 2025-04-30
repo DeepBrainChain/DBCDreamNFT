@@ -10,14 +10,16 @@ import "forge-std/console.sol";
 
 /// @custom:oz-upgrades-from OldDBCDreamNFT
 contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
-    uint256 public constant TOKEN_ID = 1;
     string private _name;
     string private _symbol;
 
+    address public canUpgradeAddress;
+
     mapping(address => uint256[]) public address2TokenIds;
     mapping(address => bool) public minters;
-    address public canUpgradeAddress;
-    uint256 public mintedAmount;
+    mapping(uint256 => uint256) public level2MintedAmount;
+    mapping(uint256 => uint256) public level2DBCRewardAmount;
+
 
     event Minted(address indexed to, uint256 level, uint256 amount);
 
@@ -49,8 +51,12 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
         require(msg.sender == canUpgradeAddress || msg.sender == owner(), "Only canUpgradeAddress can upgrade");
     }
 
-    function setCanUpgradeAddress(address addr) internal onlyOwner {
+    function setCanUpgradeAddress(address addr) external onlyOwner {
         canUpgradeAddress = addr;
+    }
+
+    function setLevelDBCRewardAmount() external onlyOwner {
+        level2DBCRewardAmount[1] = 1_300_000 ether;
     }
 
     modifier onlyMinter() {
@@ -58,15 +64,18 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
         _;
     }
 
-    function mint(address to, uint256 amount) public onlyMinter {
-        _mint(to, TOKEN_ID, amount, "");
-        mintedAmount ++;
-        emit Minted(to, TOKEN_ID, amount);
+    function mint(address to, uint256 level, uint256 amount) public onlyMinter {
+        require(amount > 0, "Amount must be greater than zero");
+        // todo add other level
+        require(level == 1, "invalid level");
+        _mint(to, level, amount, "");
+        level2MintedAmount[level] += 1;
+        emit Minted(to, level, amount);
     }
 
-    function batchMint(address[] calldata targets, uint256[] calldata amounts) public {
+    function batchMint(address[] calldata targets, uint256[] calldata levels, uint256[] calldata amounts) public {
         for (uint8 i = 0; i < targets.length; i++) {
-            mint(targets[i], amounts[i]);
+            mint(targets[i], levels[i], amounts[i]);
         }
     }
 
@@ -81,14 +90,13 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
             minters[_minters[i]] = false;
         }
     }
-
     function _baseURI() internal pure returns (string memory) {
         return "https://raw.githubusercontent.com/DeepBrainChain/DBCDreamNFT/main/resource/metadata/";
     }
 
-//    function uri(uint256 id) public pure override returns (string memory) {
-//        return string(abi.encodePacked(_baseURI(), Strings.toString(id), ".json"));
-//    }
+    function uri(uint256 id) public pure override returns (string memory) {
+        return string(abi.encodePacked(_baseURI(), Strings.toString(id), ".json"));
+    }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC1155Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);

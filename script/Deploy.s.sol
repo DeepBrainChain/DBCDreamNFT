@@ -33,7 +33,9 @@ contract Deploy is Script {
     function deploy() public returns (address proxy, address logic) {
         //        Options memory opts;
 
-        proxy = Upgrades.deployUUPSProxy("DBCDreamNFT.sol:DBCDreamNFT", abi.encodeCall(DBCDreamNFT.initialize, (msg.sender)));
+        proxy = Upgrades.deployUUPSProxy(
+            "DBCDreamNFT.sol:DBCDreamNFT", abi.encodeCall(DBCDreamNFT.initialize, (msg.sender))
+        );
         return (proxy, logic);
     }
 }

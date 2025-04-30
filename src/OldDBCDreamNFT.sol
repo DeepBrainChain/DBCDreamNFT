@@ -8,15 +8,18 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
+/// @custom:oz-upgrades-from OldDBCDreamNFT
 contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
-    uint256 public constant TOKEN_ID = 1;
     string private _name;
     string private _symbol;
 
+    address public canUpgradeAddress;
+
     mapping(address => uint256[]) public address2TokenIds;
     mapping(address => bool) public minters;
-    address public canUpgradeAddress;
-    uint256 public mintedAmount;
+    mapping(uint256 => uint256) public level2MintedAmount;
+    mapping(uint256 => uint256) public level2DBCRewardAmount;
+
 
     event Minted(address indexed to, uint256 level, uint256 amount);
 
@@ -25,8 +28,8 @@ contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
 
-        _name = "DBCDreamNFT";
-        _symbol = "DBCDreamNFT";
+        _name = "DBCDreamNFT111";
+        _symbol = "DBCDreamNFT111";
         canUpgradeAddress = initialOwner;
     }
 
@@ -52,19 +55,27 @@ contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable
         canUpgradeAddress = addr;
     }
 
+    function setLevelDBCRewardAmount() external onlyOwner {
+        level2DBCRewardAmount[1] = 1_300_000 ether;
+    }
+
     modifier onlyMinter() {
-        require(minters[msg.sender], "Not authorized to mint");
+        require(minters[msg.sender] || msg.sender == owner(), "Not authorized to mint");
         _;
     }
 
-    function mint(address to, uint256 amount) public onlyMinter {
-        _mint(to, TOKEN_ID, amount, "");
-        emit Minted(to, TOKEN_ID, amount);
+    function mint(address to, uint256 level, uint256 amount) public onlyMinter {
+        require(amount > 0, "Amount must be greater than zero");
+        // todo add other level
+//        require(level == 1, "Level must be greater than zero");
+        _mint(to, level, amount, "");
+        level2MintedAmount[level] += 1;
+        emit Minted(to, level, amount);
     }
 
-    function batchMint(address[] calldata targets, uint256[] calldata amounts) public {
+    function batchMint(address[] calldata targets, uint256[] calldata levels, uint256[] calldata amounts) public {
         for (uint8 i = 0; i < targets.length; i++) {
-            mint(targets[i], amounts[i]);
+            mint(targets[i], levels[i], amounts[i]);
         }
     }
 
@@ -79,7 +90,6 @@ contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable
             minters[_minters[i]] = false;
         }
     }
-
     function _baseURI() internal pure returns (string memory) {
         return "https://raw.githubusercontent.com/DeepBrainChain/DBCDreamNFT/main/resource/metadata/";
     }
@@ -93,9 +103,9 @@ contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable
     }
 
     function getBalance(address owner, uint256 amount)
-        public
-        view
-        returns (uint256[] memory tokenIds, uint256[] memory amounts)
+    public
+    view
+    returns (uint256[] memory tokenIds, uint256[] memory amounts)
     {
         require(owner != address(0), "Invalid address");
         require(amount > 0, "Amount must be greater than zero");

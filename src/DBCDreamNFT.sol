@@ -17,6 +17,7 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
     mapping(address => uint256[]) public address2TokenIds;
     mapping(address => bool) public minters;
     address public canUpgradeAddress;
+    uint256 public mintedAmount;
 
     event Minted(address indexed to, uint256 level, uint256 amount);
 
@@ -59,6 +60,7 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
 
     function mint(address to, uint256 amount) public onlyMinter {
         _mint(to, TOKEN_ID, amount, "");
+        mintedAmount ++;
         emit Minted(to, TOKEN_ID, amount);
     }
 
@@ -84,9 +86,9 @@ contract DBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable, U
         return "https://raw.githubusercontent.com/DeepBrainChain/DBCDreamNFT/main/resource/metadata/";
     }
 
-    function uri(uint256 id) public pure override returns (string memory) {
-        return string(abi.encodePacked(_baseURI(), Strings.toString(id), ".json"));
-    }
+//    function uri(uint256 id) public pure override returns (string memory) {
+//        return string(abi.encodePacked(_baseURI(), Strings.toString(id), ".json"));
+//    }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC1155Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);

@@ -16,6 +16,7 @@ contract OldDBCDreamNFT is Initializable, ERC1155Upgradeable, OwnableUpgradeable
     mapping(address => uint256[]) public address2TokenIds;
     mapping(address => bool) public minters;
     address public canUpgradeAddress;
+    uint256 public mintedAmount;
 
     event Minted(address indexed to, uint256 level, uint256 amount);
 
